@@ -1,0 +1,52 @@
+#include <SoftwareSerial.h>
+
+SoftwareSerial BTSerial(10, 11);
+
+const int trigPin = A0;
+const int echoPin = A1;
+
+const int minDistance = 5;
+const int maxDistance = 100;
+
+void setup() {
+
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+
+  Serial.begin(9600);
+
+  BTSerial.begin(9600);
+}
+
+void loop() {
+ 
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(5);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  long tiempo = pulseIn(echoPin, HIGH);
+
+  float distancia = float(tiempo * 0.0343) / 1;
+  delay(10);
+
+  int porcentaje = map(distancia, minDistance, maxDistance, 100, 0);
+
+  if (porcentaje < 0) {
+    porcentaje = 0;
+  } else if (porcentaje > 100) {
+    porcentaje = 100;
+  }
+
+  Serial.print("Distancia: ");
+  Serial.print(distancia);
+  Serial.print(" cm, Porcentaje: ");
+  Serial.print(porcentaje);
+  Serial.println("%");
+
+  BTSerial.print(porcentaje);
+  BTSerial.println("%");
+
+  delay(500);
+}
