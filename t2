@@ -1,0 +1,56 @@
+#include <SoftwareSerial.h>
+
+SoftwareSerial BTSerial(10, 11);
+
+const int trigPin = A0;
+const int echoPin = A1;
+
+const int minDistance = 5;
+const int maxDistance = 100;
+
+void setup() {
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+
+  Serial.begin(9600);
+  BTSerial.begin(9600);
+}
+
+void loop() {
+  // Enviar un pulso ultrasónico
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2); // Corrige el tiempo en bajo a 2 microsegundos en lugar de 5
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  // Leer el tiempo de duración del pulso de retorno
+  long duration = pulseIn(echoPin, HIGH);
+
+  // Calcular la distancia en cm
+  float distance = (duration * 0.0343) / 2.0;
+
+  // Mapear la distancia a un porcentaje
+  int percentage = map(distance, minDistance, maxDistance, 100, 0);
+
+  // Asegurar que el porcentaje esté en el rango de 0 a 100
+  if (percentage < 0) {
+    percentage = 0;
+  } else if (percentage > 100) {
+    percentage = 100;
+  }
+
+  // Imprimir resultados en el puerto serie
+  Serial.print("Distancia: ");
+  Serial.print(distance);
+  Serial.print(" cm, Porcentaje: ");
+  Serial.print(percentage);
+  Serial.println("%");
+
+  // Enviar resultados por Bluetooth
+  BTSerial.print(percentage);
+  BTSerial.println("%");
+
+  // Esperar un tiempo antes de repetir el ciclo
+  delay(500);
+}
